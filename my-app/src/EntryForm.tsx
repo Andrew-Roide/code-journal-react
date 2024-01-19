@@ -1,88 +1,6 @@
 import { useState } from 'react';
-
-const data = {
-  entries: [],
-  nextEntryId: 1,
-};
-
-function GetTitleValue({ onTitleChange }) {
-  const [title, setTitle] = useState('');
-
-  function handleTitleChange(event) {
-    const titleValue = event.target.value;
-    setTitle(titleValue);
-    onTitleChange(titleValue);
-  }
-
-  return (
-    <div>
-      <label className="margin-bottom-1 d-block" htmlFor="title">
-        Title
-      </label>
-      <input
-        required
-        className="input-b-color text-padding input-b-radius purple-outline input-height margin-bottom-2 d-block width-100"
-        type="text"
-        value={title}
-        onChange={handleTitleChange}
-      />
-    </div>
-  );
-}
-
-function GetPhotoUrlValue({ onPhotoUrlChange }) {
-  const [photoUrl, setPhotoUrl] = useState('');
-
-  function handlePhotoUrlChange(event) {
-    const photoUrlValue = event.target.value;
-    setPhotoUrl(photoUrlValue);
-    onPhotoUrlChange(photoUrlValue);
-  }
-
-  return (
-    <>
-      <div>
-        <label className="margin-bottom-1 d-block" htmlFor="formURL">
-          Photo URL
-        </label>
-        <input
-          required
-          className="input-b-color text-padding input-b-radius purple-outline input-height margin-bottom-2 d-block width-100"
-          type="text"
-          name="formURL"
-          value={photoUrl}
-          onChange={handlePhotoUrlChange}
-        />
-      </div>
-    </>
-  );
-}
-
-function GetNotesValue({ onNotesChange }) {
-  const [notes, setNotes] = useState('');
-
-  function handleNotesChange(event) {
-    const notesValue = event.target.value;
-    setNotes(notesValue);
-    onNotesChange(notesValue);
-  }
-
-  return (
-    <div className="column-full">
-      <label className="margin-bottom-1 d-block" htmlFor="formNotes">
-        Notes
-      </label>
-      <textarea
-        className="input-b-color text-padding input-b-radius purple-outline d-block width-100"
-        name="formNotes"
-        cols={30}
-        rows={10}
-        value={notes}
-        onChange={handleNotesChange}
-      />
-    </div>
-  );
-}
+import { addEntry } from './data';
+import './data';
 
 export default function EntryForm() {
   const [formData, setFormData] = useState({
@@ -91,57 +9,84 @@ export default function EntryForm() {
     notes: '',
   });
 
-  function handleTitleChange(titleValue) {
-    setFormData((prevData) => ({ ...prevData, title: titleValue }));
+  const { title, photoUrl, notes } = formData;
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   }
 
-  function handlePhotoUrlChange(photoUrlValue) {
-    setFormData((prevData) => ({ ...prevData, photoUrl: photoUrlValue }));
-  }
-
-  function handleNotesChange(notesValue) {
-    setFormData((prevData) => ({ ...prevData, notes: notesValue }));
-  }
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const updatedData = {
-      entries: [...data.entries, formData],
-      nextEntryId: data.nextEntryId + 1,
-    };
-
-    const dataJSON = JSON.stringify(updatedData);
-    localStorage.setItem('code-journal-data', dataJSON);
-    setFormData(formData);
+  function handleSubmit(e) {
+    e.preventDefault();
+    addEntry(formData);
+    setFormData({
+      title: '',
+      photoUrl: '',
+      notes: '',
+    });
   }
 
   return (
-    <>
-      <div className="container">
+    <main>
+      <div className="container" data-view="entry-form">
         <div className="row">
           <div className="column-full d-flex justify-between">
             <h1>New Entry</h1>
           </div>
         </div>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="row margin-bottom-1">
             <div className="column-half">
               <img
                 className="input-b-radius form-image"
-                src={formData.photoUrl || 'images/placeholder-image-square.jpg'}
-                alt="Entry Image Placeholder"
+                src={photoUrl || 'images/placeholder-image-square.jpg'}
+                alt="image of entry image"
               />
             </div>
-
             <div className="column-half">
-              <GetTitleValue onTitleChange={handleTitleChange} />
-              <GetPhotoUrlValue onPhotoUrlChange={handlePhotoUrlChange} />
+              <label className="margin-bottom-1 d-block" htmlFor="title">
+                Title
+              </label>
+              <input
+                required
+                className="input-b-color text-padding input-b-radius purple-outline input-height margin-bottom-2 d-block width-100"
+                type="text"
+                name="title"
+                value={title}
+                onChange={handleChange}
+              />
+              <label className="margin-bottom-1 d-block" htmlFor="photoUrl">
+                Photo URL
+              </label>
+              <input
+                required
+                className="input-b-color text-padding input-b-radius purple-outline input-height margin-bottom-2 d-block width-100"
+                type="text"
+                name="photoUrl"
+                value={photoUrl}
+                onChange={handleChange}
+              />
             </div>
           </div>
           <div className="row margin-bottom-1">
-            <GetNotesValue onNotesChange={handleNotesChange} />
+            <div className="column-full">
+              <label className="margin-bottom-1 d-block" htmlFor="notes">
+                Notes
+              </label>
+              <textarea
+                required
+                className="input-b-color text-padding input-b-radius purple-outline d-block width-100"
+                name="notes"
+                cols={30}
+                rows={10}
+                value={notes}
+                onChange={handleChange}
+              />
+            </div>
           </div>
-
           <div className="row">
             <div className="column-full d-flex justify-between">
               <button className="invisible delete-entry-button" type="button">
@@ -149,13 +94,13 @@ export default function EntryForm() {
               </button>
               <button
                 className="input-b-radius text-padding purple-background white-text"
-                onClick={handleSubmit}>
+                type="submit">
                 SAVE
               </button>
             </div>
           </div>
         </form>
       </div>
-    </>
+    </main>
   );
 }
